@@ -1,4 +1,4 @@
-//autogen: getwalsh --size=4 walsh4_generated.c
+//autogen: genwalsh --size=4 walsh4_generated.c
 #include <stdalign.h>
 #include <string.h>
 void walsh4(int * imageData ) {
