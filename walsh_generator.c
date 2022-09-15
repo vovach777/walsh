@@ -1,12 +1,12 @@
 //based on soucecode:  
 //  https://github.com/asad82/2D-Signal-Image-Transforms/blob/master/Code/TransformsView.cpp
-#include <math.h>
-#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <math.h>
 
-void DWalshTForward(const int* imageData,  int * magnitudeImage, int N)
+void GenWalsh( int N, FILE * f)
 {
-
 		int x,y,u,v;
 		// NOTE: Input image must be square cx=cy
 		// compute the value of small n from the value of Capital N
@@ -21,8 +21,13 @@ void DWalshTForward(const int* imageData,  int * magnitudeImage, int N)
 		int tempX,tempY,tempU,tempV,bix,biy,piu,piv,b1u,b2u,b1v,b2v;
 		int summation;
 
+      fputs( "#include <stdalign.h>\n", f );
+      fputs( "#include <string.h>\n", f);
+      fprintf(f, "void walsh%d(int * imageData ) {\n", N);
+      fprintf(f, "alignas(32) int magnitudeImage[%d] = {0};\n",N*N);
+
 		// clear the buffer
-      		memset(magnitudeImage,0, sizeof(int) * N*N);
+      fprintf(f, "memset(magnitudeImage,0, sizeof(int) * %d);\n",N*N);
 
 		for (u=0; u<N; u++)
 		{
@@ -76,15 +81,42 @@ void DWalshTForward(const int* imageData,  int * magnitudeImage, int N)
 							summation+=sum;
 
 						}// end of for loop on i
-						magnitudeImage[u*N+v] += ( imageData[x*N+y] * ( pow(-1,summation) )  );
-                 				printf( "magnitudeImage[%d] %c= imageData[%d];\n",u*N+v, (pow(-1,summation) > 0) ? '+' : '-',  x*N+y);
+                  fprintf(f, "magnitudeImage[%d] %c= imageData[%d];\n",u*N+v, (pow(-1,summation) > 0) ? '+' : '-',  x*N+y);
 
 					}
 				}
-				magnitudeImage[u*N+v]=magnitudeImage[u*N+v]/N;
-            			printf( "magnitudeImage[%d] /= %d;\n",u*N+v,N);
+            fprintf(f, "magnitudeImage[%d] /= %d;\n",u*N+v,N);
 			}
 		}// end of outer for loop
+      fprintf(f,"memcpy(imageData, magnitudeImage, %d * sizeof(int));\n",N*N);
+      fputs("}\n",f);
 
 }// end of function
 
+
+int main(int argc, char* argv[]) {
+   int sz = 8;
+   char * filename = "";
+   // parse args
+   for (int i = 1; i < argc; i++) {
+      if (strncmp(argv[i], "--",2)==0) {
+         if (strncmp(argv[i], "--size=",7) == 0) {
+            sz = strtoul( argv[i] + 7,NULL, 10 );
+         }
+      } else {
+         filename = argv[i];
+      }
+   }
+   //generate
+   if (sz & (sz-1) != 0) {
+      fprintf(stderr,"size must be power of two!!!");
+      exit(1);
+   }
+   FILE * f = NULL;
+   if (strlen(filename) > 0) {
+      f = fopen(filename, "w");
+   }
+   GenWalsh(sz, f ? f : stdout);
+   if (f) fclose(f);
+
+}
