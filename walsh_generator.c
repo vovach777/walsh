@@ -22,7 +22,7 @@ void DWalshTForward(const int* imageData,  int * magnitudeImage, int N)
 		int summation;
 
 		// clear the buffer
-      memset(magnitudeImage,0, sizeof(int) * N*N);
+      		memset(magnitudeImage,0, sizeof(int) * N*N);
 
 		for (u=0; u<N; u++)
 		{
@@ -76,13 +76,13 @@ void DWalshTForward(const int* imageData,  int * magnitudeImage, int N)
 							summation+=sum;
 
 						}// end of for loop on i
-						magnitudeImage[u*8+v] += ( imageData[x*8+y] * ( pow(-1,summation) )  );
-                  printf( "magnitudeImage[%d] %c= imageData[%d];\n",u*8+v, (pow(-1,summation) > 0) ? '+' : '-',  x*8+y);
+						magnitudeImage[u*N+v] += ( imageData[x*N+y] * ( pow(-1,summation) )  );
+                 				printf( "magnitudeImage[%d] %c= imageData[%d];\n",u*N+v, (pow(-1,summation) > 0) ? '+' : '-',  x*N+y);
 
 					}
 				}
-				magnitudeImage[u*8+v]=magnitudeImage[u*8+v]/N;
-            printf( "magnitudeImage[%d] /= %d;\n",u*8+v,N);
+				magnitudeImage[u*N+v]=magnitudeImage[u*N+v]/N;
+            			printf( "magnitudeImage[%d] /= %d;\n",u*N+v,N);
 			}
 		}// end of outer for loop
 
